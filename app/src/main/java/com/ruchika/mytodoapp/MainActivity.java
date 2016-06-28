@@ -1,28 +1,35 @@
 package com.ruchika.mytodoapp;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.activeandroid.ActiveAndroid;
+import com.activeandroid.Configuration;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+
+;
+
+//import com.activeandroid.ActiveAndroid;
+
+//import com.activeandroid.ActiveAndroid;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList<String> items;
+    //Select query returns List
+    List<Item> itemsL;
+    // Construct ArrayList for model type
+    ArrayList<Item> items;
     ArrayAdapter<String> itemsAdapter;
     ListView lvItems;
     /**
@@ -35,21 +42,35 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Initialize Active Android
+        Configuration.Builder dbConfiguration = new Configuration.Builder(this);
+        dbConfiguration.setDatabaseName("todo.db");
+        dbConfiguration.addModelClass(Item.class);
+        ActiveAndroid.initialize(dbConfiguration.create());
+
+
         setContentView(R.layout.activity_main);
+        //Displays List field
         lvItems = (ListView) findViewById(R.id.lvItems);
+
         //items = new ArrayList<>();
-        readItems();
+
+      /* 2 readItems();
         itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
-        lvItems.setAdapter(itemsAdapter);
+        lvItems.setAdapter(itemsAdapter);*/
+
        /* items.add("First Item");
          items.add("Second Item");*/
-        setupListViewListener();
+
+       // 2setupListViewListener();
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    private void setupListViewListener() {
+   /* 2 private void setupListViewListener() {
         lvItems.setOnItemLongClickListener
                 (
                         new AdapterView.OnItemLongClickListener() {
@@ -57,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                             public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long id) {
                                 items.remove(pos);
                                 itemsAdapter.notifyDataSetChanged();
-                                writeItems();
+                                //writeItems();
                                 return true;
                             }
                         });
@@ -74,37 +95,62 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
     }
-
+*/
 
 
     public void onAddItem(View V) {
         EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
         String itemText = etNewItem.getText().toString();
-        itemsAdapter.add(itemText);
+      /*  if (TextUtils.isEmpty(name)) {
+            etNewItem.requestFocus();
+            Toast.makeText(context, R.string.please_enter_name, Toast.LENGTH_SHORT).show();
+            return;
+        }*/
+
+        Item it = new Item();
+        it.name = itemText;
+        it.save();
+       // itemsAdapter.add(itemText);
         etNewItem.setText("");
-        writeItems();
+       // writeItems();
     }
 
-    private void readItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
+   /*2 private void readItems() {
         try {
-            items = new ArrayList<String>(FileUtils.readLines(todoFile));
+
+
+            // Construct adapter plugging in the array source
+            itemsAdapter =
+                    new ArrayAdapter<Item> (this, items);
+            // Query ActiveAndroid for list of data
+            List<TodoItem> queryResults = new Select().from(TodoItem.class)
+                    .orderBy("Name ASC").limit(100).execute();
+            // Load the result into the adapter using `addAll`
+            adapterTodoItems.addAll(queryResults);
+
+
+
+
+            itemsL = Item.getAll();
+
+
         } catch (IOException e) {
             items = new ArrayList<String>();
         }
-    }
+    }*/
 
-    private void writeItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
+    /*private void writeItems() {
+        //File filesDir = getFilesDir();
+        //File todoFile = new File(filesDir, "todo.txt");
+
         try {
-            FileUtils.writeLines(todoFile, items);
+        //    FileUtils.writeLines(todoFile, items);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
+    /*2
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
@@ -113,10 +159,10 @@ public class MainActivity extends AppCompatActivity {
             int pos = data.getIntExtra("position", 0);
             items.remove(pos);
             itemsAdapter.insert(updatedValue, pos);
-            writeItems();
+           // writeItems();
         }
 
-    }
+    }*/
 
     @Override
     public void onStart() {
